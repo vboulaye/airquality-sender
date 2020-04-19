@@ -13,8 +13,8 @@ SoftwareSerial pmSensorSerial(13, 15);
 // #define DEEP_SLEEP
 
 // PMS_READ_INTERVAL (4:30 min) and PMS_READ_FIRST_DELAY (30 sec) CAN'T BE EQUAL! Values are also used to detect sensor state.
-static const uint32_t PMS_READ_INTERVAL = 10000;
-static const uint32_t PMS_READ_FIRST_DELAY = 30000;
+static const uint32_t PMS_READ_INTERVAL = 10 * 1000;
+static const uint32_t PMS_READ_FIRST_DELAY =  5* 1000;
 
 // Default sensor state.
 uint32_t timerInterval = PMS_READ_FIRST_DELAY;
@@ -48,22 +48,23 @@ void readData()
     {
       previousChecksum = data.checksum;
 
-      DEBUG_OUT.println();
+      
       samples++;
       avg_1_0 += log10(data.PM_AE_UG_1_0);
       avg_2_5 += log10(data.PM_AE_UG_2_5);
       avg_10_0 += log10(data.PM_AE_UG_10_0);
 
-      DEBUG_OUT.print("PM 1.0 (ug/m3): ");
-      DEBUG_OUT.println(data.PM_AE_UG_1_0);
+      // DEBUG_OUT.print("PM 1.0 (ug/m3): ");
+      // DEBUG_OUT.println(data.PM_AE_UG_1_0);
 
-      DEBUG_OUT.print("PM 2.5 (ug/m3): ");
-      DEBUG_OUT.println(data.PM_AE_UG_2_5);
+      // DEBUG_OUT.print("PM 2.5 (ug/m3): ");
+      // DEBUG_OUT.println(data.PM_AE_UG_2_5);
 
-      DEBUG_OUT.print("PM 10.0 (ug/m3): ");
-      DEBUG_OUT.println(data.PM_AE_UG_10_0);
+      // DEBUG_OUT.print("PM 10.0 (ug/m3): ");
+      // DEBUG_OUT.println(data.PM_AE_UG_10_0);
 
-      DEBUG_OUT.println();
+      DEBUG_OUT.print(samples);
+      DEBUG_OUT.println(" samples.");
     }
     else
     {
@@ -157,32 +158,3 @@ void loop()
   // Do other stuff...
 #endif // DEEP_SLEEP
 }
-
-#ifdef TEST_ADAFRUIT
-#include "PmSensor.h"
-
-PmSensor pmSensor;
-
-uint16_t counter = 0;
-
-void setup()
-{
-  // our debugging output
-  Serial.begin(9600);
-  pmSensorSerial.begin(9600);
-  pmSensor.setupPmSensor(pmSensorSerial);
-
-  // sensor baud rate is 9600
-  //pmsSerial.begin(9600);
-}
-
-void loop()
-{
-
-  if (pmSensor.loopPmSensor())
-  {
-    pmSensor.printDebug();
-    delay(100);
-  }
-}
-#endif
