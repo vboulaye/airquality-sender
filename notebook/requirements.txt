@@ -1,0 +1,8 @@
+ipython
+jupyter
+pandas
+matplotlib
+dnspython
+requests
+scipy
+altair
