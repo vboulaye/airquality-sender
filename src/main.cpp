@@ -24,6 +24,7 @@ Webcom webcom;
 
 // PMS_READ_INTERVAL (4:30 min) and PMS_READ_FIRST_DELAY (30 sec) CAN'T BE EQUAL! Values are also used to detect sensor state.
 
+//#define DEV
 #ifdef DEV
 static const uint32_t PMS_READ_INTERVAL = 10 * 1000;
 static const uint32_t PMS_READ_FIRST_DELAY = 5 * 1000;
@@ -119,9 +120,9 @@ void readData()
     doc["pm_1_0"] = avg.PM_AE_UG_1_0;
     doc["pm_2_5"] = avg.PM_AE_UG_2_5;
     doc["pm_10_0"] = avg.PM_AE_UG_10_0;
-    // JsonObject &ts = jb.createObject();
-    // ts[".sv"] = "timestamp";
-    // doc["ts"] = ts;
+    JsonObject &ts = jb.createObject();
+    ts[".sv"] = "timestamp";
+    doc["ts"] = ts;
 
     String webcomPayload;
     doc.prettyPrintTo(webcomPayload);
