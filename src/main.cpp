@@ -20,9 +20,10 @@ PmsWifi pmsWifi;
 PmsNtp pmsNtp;
 Webcom webcom;
 // To use Deep Sleep connect RST to GPIO16 (D0) and uncomment below line.
-// #define DEEP_SLEEP
+#define DEEP_SLEEP
 
-// PMS_READ_INTERVAL (4:30 min) and PMS_READ_FIRST_DELAY (30 sec) CAN'T BE EQUAL! Values are also used to detect sensor state.
+// PMS_READ_INTERVAL (4:30 min) and PMS_READ_FIRST_DELAY (30 sec) CAN'T BE EQUAL!
+// Values are also used to detect sensor state.
 
 //#define DEV
 #ifdef DEV
@@ -168,8 +169,9 @@ void setup()
   pms.wakeUp();
 
 #ifdef DEEP_SLEEP
-  delay(PMS_READ_DELAY);
+  delay(PMS_READ_FIRST_DELAY);
   readData();
+  DEBUG_OUT.println("shuting down");
   pms.sleep();
   ESP.deepSleep(PMS_READ_INTERVAL * 1000);
 #endif // DEEP_SLEEP
