@@ -3,8 +3,8 @@
 #define __ntp_h
 
 #include <Arduino.h>
- 
-#include <TimeLib.h> //TimeLib library is needed https://github.com/PaulStoffregen/Time
+
+#include <TimeLib.h>      //TimeLib library is needed https://github.com/PaulStoffregen/Time
 #include <NtpClientLib.h> //Include NtpClient library header
 
 class PmsNtp
@@ -12,8 +12,10 @@ class PmsNtp
 public:
   void setupNtp(const String &ntpServerName, int8_t timeZone = 1, bool daylight = true);
   void loopNtp();
-  
-private: 
+  bool isSynchronized() { return sync; }
+
+private:
+  bool sync;
 };
 
 #endif

@@ -19,6 +19,10 @@ void PmsNtp::setupNtp(const String &ntpServerName, int8_t timeZone, bool dayligh
   // changed later with setTimeOffset() ). Additionaly you can specify the
   // update interval (in milliseconds, can be changed using setUpdateInterval() ).
   NTP.begin(ntpServerName, timeZone,daylight);
+
+  NTP.onNTPSyncEvent ([this](NTPSyncEvent_t event) {
+      sync = true;
+  });
 }
 
 void PmsNtp::loopNtp()

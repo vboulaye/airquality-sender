@@ -41,15 +41,8 @@ uint32_t timerInterval = PMS_READ_FIRST_DELAY;
 
 PMS pms(pmSensorSerial);
 
-
 void readData()
 {
-
-  // Clear buffer (removes potentially old data) before read. Some data could have been also sent before switching to passive mode.
-  while (pmSensorSerial.available())
-  {
-    pmSensorSerial.read();
-  }
 
   double avg_1_0 = 0, avg_2_5 = 0, avg_10_0 = 0;
   double samples = 0;
@@ -59,34 +52,48 @@ void readData()
   for (int i = 0; i < NUMREADS; i++)
   {
     PMS::DATA data;
+    // Clear buffer (removes potentially old data) before read. Some data could have been also sent before switching to passive mode.
+    DEBUG_OUT.println("clear buffer");
+    while (pmSensorSerial.available())
+    {
+      pmSensorSerial.read();
+    }
 
+    DEBUG_OUT.println("requestread");
     pms.requestRead();
-
-    if (pms.readUntil(data, 2000) && previousChecksum != data.checksum)
+    
+    if (!pms.readUntil(data, 3000))
     {
-      previousChecksum = data.checksum;
-
-      samples++;
-      avg_1_0 += log10(data.PM_AE_UG_1_0);
-      avg_2_5 += log10(data.PM_AE_UG_2_5);
-      avg_10_0 += log10(data.PM_AE_UG_10_0);
-
-      // DEBUG_OUT.print("PM 1.0 (ug/m3): ");
-      // DEBUG_OUT.println(data.PM_AE_UG_1_0);
-
-      // DEBUG_OUT.print("PM 2.5 (ug/m3): ");
-      // DEBUG_OUT.println(data.PM_AE_UG_2_5);
-
-      // DEBUG_OUT.print("PM 10.0 (ug/m3): ");
-      // DEBUG_OUT.println(data.PM_AE_UG_10_0);
-
-      DEBUG_OUT.print(samples);
-      DEBUG_OUT.println(" samples.");
+      DEBUG_OUT.println("No data");
+      continue;
     }
-    else
+    DEBUG_OUT.print("checksum: ");
+    DEBUG_OUT.println(data.checksum);
+    if (previousChecksum == data.checksum)
     {
-      DEBUG_OUT.println("No data or duplicate data.");
+      DEBUG_OUT.println("Duplicate data.");
+      continue;
     }
+
+    previousChecksum = data.checksum;
+
+    samples++;
+    avg_1_0 += log10(data.PM_AE_UG_1_0);
+    avg_2_5 += log10(data.PM_AE_UG_2_5);
+    avg_10_0 += log10(data.PM_AE_UG_10_0);
+
+    DEBUG_OUT.print("PM 1.0 (ug/m3): ");
+    DEBUG_OUT.print(data.PM_AE_UG_1_0);
+    DEBUG_OUT.print(", ");
+
+    // DEBUG_OUT.print("PM 2.5 (ug/m3): ");
+    // DEBUG_OUT.println(data.PM_AE_UG_2_5);
+
+    // DEBUG_OUT.print("PM 10.0 (ug/m3): ");
+    // DEBUG_OUT.println(data.PM_AE_UG_10_0);
+
+    DEBUG_OUT.print(samples);
+    DEBUG_OUT.println(" samples.");
   }
 
   if (samples > 0)
@@ -160,8 +167,10 @@ void setup()
   DEBUG_OUT.println("starting pms sensor");
   pmSensorSerial.begin(PMS::BAUD_RATE);
 
+#ifndef DEEP_SLEEP
   DEBUG_OUT.println("Switch to passive mode.");
   pms.passiveMode();
+#endif
 
   // Default state after sensor power, but undefined after ESP restart e.g. by OTA flash, so we have to manually wake up the sensor for sure.
   // Some logs from bootloader is sent via Serial port to the sensor after power up. This can cause invalid first read or wake up so be patient and wait for next read cycle.
@@ -169,7 +178,19 @@ void setup()
   pms.wakeUp();
 
 #ifdef DEEP_SLEEP
+  DEBUG_OUT.println("waiting for the sensor to be ready");
   delay(PMS_READ_FIRST_DELAY);
+  while (!pmsNtp.isSynchronized())
+  {
+    DEBUG_OUT.println("waiting toget the ttime synced");
+    delay(15 * 1000);
+    if (millis() > 5 * 60 * 1000)
+    {
+      DEBUG_OUT.println("giving up, will try another time");
+      pms.sleep();
+      ESP.deepSleep(PMS_READ_INTERVAL * 1000);
+    }
+  }
   readData();
   DEBUG_OUT.println("shuting down");
   pms.sleep();
