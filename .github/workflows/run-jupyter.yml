@@ -12,10 +12,6 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - name: Hello world
-      env:
-        SECRETS: ${{ toJson(secrets) }}
-      run: "echo SECRETS: $SECRETS"
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v1
     - name: Install dependencies
@@ -25,7 +21,8 @@ jobs:
     - uses: yaananth/run-notebook@v1
       env:
         RUNNER: ${{ toJson(runner) }}
-        SECRETS: ${{ toJson(secrets) }}
+        #SECRETS: ${{ toJson(secrets) }}
+        SECRETS: ${{ format('{{ "webcom_key" : "{0}" }}', secrets.WEBCOM_KEY) }}
         GITHUB: ${{ toJson(github) }}
       with:
         notebook: "notebook/AirQuality.ipynb"
