@@ -22,7 +22,7 @@ jobs:
       env:
         RUNNER: ${{ toJson(runner) }}
         #SECRETS: ${{ toJson(secrets) }}
-        SECRETS: ${{ format('{{ "webcom_key" : "{0}" }}', secrets.WEBCOM_KEY) }}
+        SECRETS: "${{ format('{{ \"webcom_key\" : \"{0}\" }}', secrets.WEBCOM_KEY) }}"
         GITHUB: ${{ toJson(github) }}
       with:
         notebook: "notebook/AirQuality.ipynb"
