@@ -12,6 +12,10 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+    - name: Hello world
+      env:
+        SECRETS: ${{ toJson(secrets) }}
+      run: "echo SECRETS: $SECRETS"
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v1
     - name: Install dependencies
