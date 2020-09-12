@@ -28,7 +28,7 @@ jobs:
         notebook: "notebook/AirQuality.ipynb"
         params: "notebook/airquality-config.json"
         isReport: False
-        poll: True
+        #poll: True
     - uses: actions/upload-artifact@v1
       if: always()
       with:
