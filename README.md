@@ -34,3 +34,11 @@ source venv/bin/activate
 jupyter notebook
 ```
 
+
+
+## esp build
+
+prepare the filesystem in platformio to make it run:
+```
+pio run --target buildfs
+```

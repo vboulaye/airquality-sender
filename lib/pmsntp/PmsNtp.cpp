@@ -32,6 +32,7 @@ void PmsNtp::setupNtp(const String &ntpServerName, int8_t timeZone, bool dayligh
   int gmtOffset_sec=timeZone*3600;
   const char* server =  ntpServerName.c_str();
   configTime(gmtOffset_sec, daylightOffset_sec, server);
+  sync=true;
 }
 
 void PmsNtp::loopNtp()

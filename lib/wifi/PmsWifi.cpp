@@ -121,11 +121,11 @@ void PmsWifi::setupWifi(byte configPin)
 
   wifiManager.setDebugOutput(true);
 
-  if (digitalRead(configPin) == LOW || AppConfiguration::get().startConfigOnBoot)
+  if (digitalRead(configPin) == HIGH || AppConfiguration::get().startConfigOnBoot)
   {
     AppConfiguration::get().startConfigOnBoot = false;
     AppConfiguration::get().saveConfig();
-    PMS_WIFI_LOG(notice, "start config portal");
+    PMS_WIFI_LOG(notice, "start config portal %T", digitalRead(configPin) == HIGH);
     wifiManager.startConfigPortal();
   }
 
@@ -168,11 +168,11 @@ void PmsWifi::setupWifi(byte configPin)
 void PmsWifi::loopWifi()
 {
 
-  if (digitalRead(configPin) == LOW || AppConfiguration::get().startConfigOnBoot)
+  if (digitalRead(configPin) == HIGH || AppConfiguration::get().startConfigOnBoot)
   {
     AppConfiguration::get().startConfigOnBoot = true;
     AppConfiguration::get().saveConfig();
-    PMS_WIFI_LOG(notice, "start config portal on reboot");
+    PMS_WIFI_LOG(notice, "start config portal on reboot %T", digitalRead(configPin));
     delay(1000);
     ESP.restart();
   }

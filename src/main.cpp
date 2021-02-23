@@ -27,6 +27,7 @@ Webcom webcom;
 // Values are also used to detect sensor state.
 
 //#define DEV
+
 #ifdef DEV
 static const uint32_t PMS_READ_INTERVAL = 10 * 1000;
 static const uint32_t PMS_READ_FIRST_DELAY = 5 * 1000;
@@ -117,8 +118,13 @@ void readData()
     DEBUG_OUT.println(avg.PM_AE_UG_10_0);
 
     char dateStr[12];
-    time_t moment = now();
-    sprintf(dateStr, "%4d/%02d/%02d", year(moment), month(moment), day(moment));
+    //time_t moment = now();
+    tm info;
+    uint32_t ms=10000;
+    getLocalTime(&info, ms);
+
+    sprintf(dateStr, "%4d/%02d/%02d", 1900+info.tm_year, 1+info.tm_mon, info.tm_mday);
+    // sprintf(dateStr, "%4d/%02d/%02d", year(moment), month(moment), day(moment));
     String path(AppConfiguration::get().webcomLocation);
     path.concat("/");
     path.concat(dateStr);
@@ -181,7 +187,9 @@ void setup()
 #ifdef DEEP_SLEEP
   DEBUG_OUT.println("waiting for the sensor to be ready");
   delay(PMS_READ_FIRST_DELAY);
-  while (!pmsNtp.isSynchronized())
+  tm info;
+  uint32_t ms=10000;
+  while (!getLocalTime(&info, ms))
   {
     DEBUG_OUT.println("waiting toget the ttime synced");
     delay(15 * 1000);
