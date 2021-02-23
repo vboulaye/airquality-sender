@@ -2,6 +2,7 @@
 #include <SoftwareSerial.h>
 #include <PMS.h>
 #include <ArduinoLog.h>
+#include <Time.h>
 
 #include "AppConfig.h"
 #include "PmsWifi.h"

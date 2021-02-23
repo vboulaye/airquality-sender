@@ -4,8 +4,8 @@
 
 #include <Arduino.h>
 
-#include <TimeLib.h>      //TimeLib library is needed https://github.com/PaulStoffregen/Time
-#include <NtpClientLib.h> //Include NtpClient library header
+// #include <TimeLib.h>      //TimeLib library is needed https://github.com/PaulStoffregen/Time
+// #include <NtpClientLib.h> //Include NtpClient library header
 
 class PmsNtp
 {

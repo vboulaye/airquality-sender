@@ -1,9 +1,11 @@
 #include "PmsWifi.h"
 
 #include <ArduinoLog.h>
-#include <ESP8266WiFi.h>
-#include <WiFiManager.h>
+#ifdef ESP32
+#include <WiFi.h>
+#else
 #include <ESP8266WebServer.h> //Local WebServer used to serve the configuration portal
+#endif
 #include <WiFiManager.h>      //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 
 #include "AppConfig.h"
