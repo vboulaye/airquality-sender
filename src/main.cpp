@@ -1,3 +1,5 @@
+
+
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <PMS.h>
@@ -7,7 +9,20 @@
 #include "AppConfig.h"
 #include "PmsWifi.h"
 #include "PmsNtp.h"
+
+//To use Deep Sleep uncomment below line and (on 8265 only?) connect RST to GPIO16 (D0)
+// #define DEEP_SLEEP
+
+//#define WEBCOM
+#define COUCHDB
+
+#ifdef WEBCOM
 #include "Webcom.h"
+#endif
+
+#ifdef COUCHDB
+#include "Couchdb.h"
+#endif
 
 #define DEBUG_OUT Serial
 #define PIN_CONFIG 2
@@ -19,19 +34,24 @@ SoftwareSerial pmSensorSerial(13, 15);
 
 PmsWifi pmsWifi;
 PmsNtp pmsNtp;
+
+#ifdef WEBCOM
 Webcom webcom;
-// To use Deep Sleep connect RST to GPIO16 (D0) and uncomment below line.
-#define DEEP_SLEEP
+#endif
+
+#ifdef COUCHDB
+Couchdb couchdb;
+#endif
 
 // PMS_READ_INTERVAL (4:30 min) and PMS_READ_FIRST_DELAY (30 sec) CAN'T BE EQUAL!
 // Values are also used to detect sensor state.
 
-//#define DEV
+#define DEV
 
 #ifdef DEV
 static const uint32_t PMS_READ_INTERVAL = 10 * 1000;
-static const uint32_t PMS_READ_FIRST_DELAY = 5 * 1000;
-#define NUMREADS 10
+static const uint32_t PMS_READ_FIRST_DELAY = 3 * 1000;
+#define NUMREADS 3
 #else
 static const uint32_t PMS_READ_INTERVAL = 5 * 60 * 1000;
 static const uint32_t PMS_READ_FIRST_DELAY = 30 * 1000;
@@ -63,7 +83,7 @@ void readData()
 
     DEBUG_OUT.println("requestread");
     pms.requestRead();
-    
+
     if (!pms.readUntil(data, 3000))
     {
       DEBUG_OUT.println("No data");
@@ -117,34 +137,73 @@ void readData()
     DEBUG_OUT.print("avg PM 10.0 (ug/m3): ");
     DEBUG_OUT.println(avg.PM_AE_UG_10_0);
 
-    char dateStr[12];
-    //time_t moment = now();
-    tm info;
-    uint32_t ms=10000;
-    getLocalTime(&info, ms);
-
-    sprintf(dateStr, "%4d/%02d/%02d", 1900+info.tm_year, 1+info.tm_mon, info.tm_mday);
+    // char dateStr[12];
+    // time_t moment = now();
     // sprintf(dateStr, "%4d/%02d/%02d", year(moment), month(moment), day(moment));
-    String path(AppConfiguration::get().webcomLocation);
-    path.concat("/");
-    path.concat(dateStr);
+    // String path(AppConfiguration::get().webcomLocation);
+    // path.concat("/");
+    // path.concat(dateStr);
 
-    const int capacity = JSON_OBJECT_SIZE(10);
+    const int capacity = JSON_OBJECT_SIZE(20);
     StaticJsonBuffer<capacity> jb;
     JsonObject &doc = jb.createObject();
     doc["pm_1_0"] = avg.PM_AE_UG_1_0;
     doc["pm_2_5"] = avg.PM_AE_UG_2_5;
     doc["pm_10_0"] = avg.PM_AE_UG_10_0;
+
+#ifdef WEBCOM
+
     JsonObject &ts = jb.createObject();
     ts[".sv"] = "timestamp";
     doc["ts"] = ts;
 
     String webcomPayload;
     doc.prettyPrintTo(webcomPayload);
-
     DEBUG_OUT.println(webcomPayload);
 
+    char dateStr[12];
+    tm info;
+    uint32_t ms=10000;
+    getLocalTime(&info, ms);
+    sprintf(dateStr, "%4d/%02d/%02d", 1900+info.tm_year, 1+info.tm_mon, info.tm_mday);
+//    time_t moment = now();
+//    sprintf(dateStr, "%4d/%02d/%02d", year(moment), month(moment), day(moment));
+    String path(AppConfiguration::get().webcomLocation);
+    path.concat("/");
+    path.concat(dateStr);
     webcom.post(path, webcomPayload);
+#endif
+
+#ifdef COUCHDB
+
+
+    // time_t moment = now();
+    // sprintf(dateStr, "%4d-%02d-%02d_%02d-%02d-%02d",
+    //   year(moment), month(moment), day(moment),
+    //   hour(moment), minute(moment), second(moment)
+    //   );
+    //doc["ts"] = "ts";
+ 
+    char dateStr[20];
+    tm info;
+    uint32_t ms=10000;
+    getLocalTime(&info, ms);
+    sprintf(dateStr, "%4d-%02d-%02dT%02d:%02d:%02d", 
+      1900+info.tm_year, 1+info.tm_mon, info.tm_mday,
+      info.tm_hour, 1+info.tm_min, info.tm_sec
+      );
+
+
+    doc["ts"] = dateStr;
+ 
+    String couchdbPayload;
+    doc.prettyPrintTo(couchdbPayload);
+    DEBUG_OUT.println(couchdbPayload);
+
+    String path(dateStr);
+    couchdb.post(path, couchdbPayload);
+#endif
+
   }
   else
   {
@@ -167,9 +226,21 @@ void setup()
   pmsWifi.setupWifi(PIN_CONFIG);
   pmsNtp.setupNtp("europe.pool.ntp.org", 1, true);
 
+#ifdef WEBCOM
   webcom.setupWebcom(
       AppConfiguration::get().webcomDatabase,
       AppConfiguration::get().webcomPassword);
+#endif
+
+#ifdef COUCHDB
+  couchdb.setupCouchdb(
+      AppConfiguration::get().couchdbUrl,
+      AppConfiguration::get().couchdbFingerprint,
+      AppConfiguration::get().couchdbDatabase,
+      AppConfiguration::get().couchdbUser,
+      AppConfiguration::get().couchdbPassword
+  );
+#endif
 
   DEBUG_OUT.println("starting pms sensor");
   pmSensorSerial.begin(PMS::BAUD_RATE);

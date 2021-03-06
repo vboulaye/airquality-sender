@@ -125,7 +125,7 @@ void PmsWifi::setupWifi(byte configPin)
   {
     AppConfiguration::get().startConfigOnBoot = false;
     AppConfiguration::get().saveConfig();
-    PMS_WIFI_LOG(notice, "start config portal %T", digitalRead(configPin) == HIGH);
+    PMS_WIFI_LOG(notice, "setupWifi start config portal %T", digitalRead(configPin) == HIGH);
     wifiManager.startConfigPortal();
   }
 
@@ -172,7 +172,7 @@ void PmsWifi::loopWifi()
   {
     AppConfiguration::get().startConfigOnBoot = true;
     AppConfiguration::get().saveConfig();
-    PMS_WIFI_LOG(notice, "start config portal on reboot %T", digitalRead(configPin));
+    PMS_WIFI_LOG(notice, "loopWifi start config portal on reboot %T", digitalRead(configPin));
     delay(1000);
     ESP.restart();
   }
