@@ -11,7 +11,7 @@
 #include "PmsNtp.h"
 
 //To use Deep Sleep uncomment below line and (on 8265 only?) connect RST to GPIO16 (D0)
-// #define DEEP_SLEEP
+#define DEEP_SLEEP
 
 //#define WEBCOM
 #define COUCHDB
@@ -46,7 +46,7 @@ Couchdb couchdb;
 // PMS_READ_INTERVAL (4:30 min) and PMS_READ_FIRST_DELAY (30 sec) CAN'T BE EQUAL!
 // Values are also used to detect sensor state.
 
-#define DEV
+// #define DEV
 
 #ifdef DEV
 static const uint32_t PMS_READ_INTERVAL = 10 * 1000;
@@ -55,7 +55,7 @@ static const uint32_t PMS_READ_FIRST_DELAY = 3 * 1000;
 #else
 static const uint32_t PMS_READ_INTERVAL = 5 * 60 * 1000;
 static const uint32_t PMS_READ_FIRST_DELAY = 30 * 1000;
-#define NUMREADS 100
+#define NUMREADS 50
 #endif
 
 // Default sensor state.
@@ -256,17 +256,22 @@ void setup()
   pms.wakeUp();
 
 #ifdef DEEP_SLEEP
-  DEBUG_OUT.println("waiting for the sensor to be ready");
+  DEBUG_OUT.print("waiting for the sensor to be ready (");
+  DEBUG_OUT.print(PMS_READ_FIRST_DELAY);
+  DEBUG_OUT.println(" ms)");
   delay(PMS_READ_FIRST_DELAY);
   tm info;
   uint32_t ms=10000;
   while (!getLocalTime(&info, ms))
   {
-    DEBUG_OUT.println("waiting toget the ttime synced");
+    DEBUG_OUT.println("waiting toget the ttime synced (15 s)");
     delay(15 * 1000);
     if (millis() > 5 * 60 * 1000)
     {
-      DEBUG_OUT.println("giving up, will try another time");
+      DEBUG_OUT.print("giving up, will try another time in (");
+      DEBUG_OUT.print(PMS_READ_INTERVAL);
+      DEBUG_OUT.println(" ms)");
+      
       pms.sleep();
       ESP.deepSleep(PMS_READ_INTERVAL * 1000);
     }

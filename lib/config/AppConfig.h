@@ -14,9 +14,12 @@ public:
         const char *webcomPassword = "XXXXX";
         const char *webcomLocation = "juvisy";
 
-        const char *couchdbUrl = "https://air-quality.ngrok.io";
+        //const char *couchdbUrl = "https://air-quality.ngrok.io";
+        //const char *couchdbFingerprint = "9B125401611B8AEF73417FBD43746B306CD7661D";
+        const char *couchdbUrl = "XXX";
         //echo "${$(openssl s_client -connect air-quality.ngrok.io:443 2>/dev/null </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | openssl x509 -noout -fingerprint -sha1)//:/ }"  | sed -e 's/.*=//' -e 's/ //g'
-        const char *couchdbFingerprint = "9B125401611B8AEF73417FBD43746B306CD7661D";
+        const char *couchdbFingerprint = "5BC71E380C92E9F135B017B2FD958FD35DC8D8EC";
+
         const char *couchdbDatabase = "air-quality-villiers";
         const char *couchdbUser = "admin";
         const char *couchdbPassword = "admin";
