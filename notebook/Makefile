@@ -17,6 +17,10 @@ start: .ACTIVATE_SOURCED
 	. venv/bin/activate
 	jupyter notebook
 
+run: .ACTIVATE_SOURCED
+	. venv/bin/activate
+	runipy AirQuality-CouchDb.ipynb
+
 .ACTIVATE_SOURCED: $(ACTIVATE)
 
 $(ACTIVATE):

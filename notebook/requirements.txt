@@ -4,6 +4,6 @@ jupyter==1.0.0
 pandas==1.2.3
 matplotlib==3.3.4
 dnspython==2.1.0
-requests=2.24.0
+requests==2.24.0
 scipy==1.6.1
 altair==4.1.0
