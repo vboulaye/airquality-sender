@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -euxo pipefail
+PATH=$PATH:/home/ubuntu/.local/bin
 
 TMP_DIR=/tmp/jupyter/airquality
 TARGET_DIR="/var/www/html/airquality/"
