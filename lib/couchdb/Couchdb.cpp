@@ -15,7 +15,7 @@ void Couchdb::setupCouchdb(const char *databaseUrl, const char *databaseFingerpr
   const char *databaseName,
   const char *user, const char *password)
 {
-  COUCHDB_LOG(notice, "Webcom::setup()");
+  COUCHDB_LOG(notice, "Couchdb::setup()");
 
   // You can specify the time server pool and the offset (in seconds, can be
   // changed later with setTimeOffset() ). Additionaly you can specify the
